@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="foundation.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <section class="row">
+            <div class="small-6 columns">
+                <h1 class="text-center">SƏN</h1>
+                <div class="healthbar">
+                    <div :style="{width: player_heal + '%'}" class="healthbar player text-center" style="background-color: green; margin: 0; color: white; max-width: 100%;">
+                        {{player_heal}}%
+                    </div>
+                </div>
+            </div>
+            <div class="small-6 columns">
+                <h1 class="text-center">MONSTER</h1>
+                <div class="healthbar">
+                    <div :style="{width: monster_heal + '%'}" class="healthbar text-center" style="background-color: green; margin: 0; color: white;">
+                        {{monster_heal}}%
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="row controls">
+            <div class="small-12 columns" v-if="!game_is_on">
+                <button @click="startGame" id="start-game">OYUNA BAŞLA</button>
+            </div>
+            <div class="small-12 columns" v-if="game_is_on">
+                <button @click="attack" id="attack">HÜCUM</button>
+                <button @click="specialAttack" id="special-attack">ÖZƏL ATAK</button>
+                <button @click="heal" id="heal">İLK YARDIM</button>
+                <button @click="giveUp" id="give-up">TƏSLİM OL!</button>
+            </div>
+        </section>
+        <section class="row log" v-if="logs.length > 0">
+            <div class="small-12 columns">
+                <ul>
+                    <li :class="{'player-turn': log.turn == 'p','monster-turn': log.turn == 'm'}" v-for="log in logs">{{log.text}}</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                player_heal: 100,
+                monster_heal: 100,
+                game_is_on: false,
+                logs: []
+            },
+            methods: {
+                startGame: function() {
+                    this.game_is_on = true;
+                    this.startBtn = false;
+                },
+                attack: function() {
+                    let monsterPoint = Math.ceil(Math.random() * 10 + 1);
+                    this.monster_heal -= monsterPoint;
+                    this.monsterAttack();
+                    this.add_to_logs({
+                        turn: "p",
+                        text: "SƏNİN ATAKIN: (" + monsterPoint + ")"
+                    })
+                },
+                monsterAttack: function() {
+                    let playerPoint = Math.ceil(Math.random() * 15 + 1);
+                    this.player_heal -= playerPoint;
+                    this.add_to_logs({
+                        turn: "m",
+                        text: "MONSTER İN ATAKI: (" + playerPoint + ")"
+                    })
+                },
+                specialAttack: function() {
+                    let monsterPoint = Math.ceil(Math.random() * 25 + 1);
+                    this.monster_heal -= monsterPoint;
+                    this.monsterAttack()
+                    this.add_to_logs({
+                        turn: "p",
+                        text: "ÖZƏL ATAK: (" + monsterPoint + ")"
+                    })
+                },
+                heal: function() {
+                    let playerPoint = Math.ceil(Math.random() * 20 + 1);
+                    this.player_heal += playerPoint;
+                    this.monsterAttack();
+                    this.add_to_logs({
+                        turn: "p",
+                        text: "ILK YARDIM: (" + playerPoint + ")"
+                    })
+                },
+                giveUp: function() {
+                    this.player_heal = 0;
+                    this.add_to_logs({
+                        turn: "p",
+                        text: "OYUNÇU IMTINA ETTI"
+                    })
+                },
+                add_to_logs: function(log) {
+                    this.logs.push(log)
+                }
+            },
+            watch: {
+                player_heal: function(value) {
+                    if (value <= 0) {
+                        this.player_heal = 0;
+                        if (confirm("OYUNU UDUZDUN. Təkrar oynamağ istəyirsən?")) {
+                            this.player_heal = 100;
+                            this.monster_heal = 100;
+                            this.logs = [];
+                        }
+                    } else if (value >= 100) {
+                        this.player_heal = 100;
+                    }
+                },
+                monster_heal: function(value) {
+                    if (value <= 0) {
+                        this.monster_heal = 0;
+                        if (confirm("OYUNU QAZANDIN. Təkrar oynamağ istəyirsən?")) {
+                            this.player_heal = 100;
+                            this.monster_heal = 100;
+                            this.logs = [];
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
