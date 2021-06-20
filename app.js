@@ -9,7 +9,6 @@
      methods: {
          startGame: function() {
              this.game_is_on = true;
-             this.startBtn = false;
          },
          attack: function() {
              let monsterPoint = Math.ceil(Math.random() * 10 + 1);
